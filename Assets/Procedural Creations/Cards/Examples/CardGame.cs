@@ -7,6 +7,8 @@ public class CardGame : MonoBehaviour
 	public CardDeck Deck;
 	public CardDeck PointsDeck;
 	//List<CardDefinition> m_deck = new List<CardDefinition>();
+	private int playerTurn = 1;
+	Card selectedCard = null;
 	
 	List<Card> m_dealer = new List<Card>();
 	List<Card> m_player = new List<Card>();
@@ -87,17 +89,21 @@ public class CardGame : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (Input.GetMouseButtonDown(0)){ // if left button pressed...
-    		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    		RaycastHit hit;
-    		if (Physics.Raycast(ray, out hit)){
-    			if (hit.transform.gameObject.name == "Card")
-    			{
-					Card selectedCard = hit.transform.gameObject.GetComponent<Card>();
-      				Debug.Log(selectedCard.Definition.Text);
-    			}
-    		}
-  		}
+		if (m_state == GameState.Started) {
+			if (Input.GetMouseButtonDown(0)){ // if left button pressed...
+				Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+				RaycastHit hit;
+				if (Physics.Raycast(ray, out hit)){
+					if (hit.transform.gameObject.name == "Card")
+					{
+						Card card = hit.transform.gameObject.GetComponent<Card>();
+						if (card.transform.rotation.y == 0){
+							checkCard(card);
+						}
+					}
+				}
+			}
+		}
 
 		if (Input.GetKeyDown(KeyCode.F1))
 		{
@@ -261,6 +267,8 @@ public class CardGame : MonoBehaviour
 			yield return new WaitForSeconds(DealTime);
 			HitDealer();
 			yield return new WaitForSeconds(DealTime);
+
+
 			HitPlayer();
 			yield return new WaitForSeconds(DealTime);
 			HitPlayer();
@@ -383,4 +391,23 @@ public class CardGame : MonoBehaviour
 			break;
 		}
 	}
+
+	void checkCard(Card card){
+		if (selectedCard != null) {
+			if (selectedCard != card) {
+				selectedCard.transform.Translate(Vector3.down);
+				selectedCard = card;
+				selectedCard.transform.Translate(Vector3.up);
+			} else {
+				selectedCard.transform.Translate(Vector3.down);
+				selectedCard = null;
+			}
+		} else {
+			selectedCard = card;
+			selectedCard.transform.Translate(Vector3.up);
+			Debug.Log(selectedCard.Definition.Text);
+		}
+	}
+
+
 }
